@@ -27,4 +27,4 @@
   ansible.builtin.systemd:
     name: nginx
     state: restarted
-    enable: true
+    enabled: true
