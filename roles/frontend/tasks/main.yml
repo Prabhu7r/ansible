@@ -1,7 +1,7 @@
 - name: Installing Ingnix
   ansible.builtin.package:
-    - name: nginx
-      state: present
+    name: nginx
+    state: present
 
 - name: Clean-up nginx
   ansible.builtin.file:
