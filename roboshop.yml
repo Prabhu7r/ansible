@@ -1,0 +1,5 @@
+- name: Playbook to configure Roboshop Project
+  hosts: "{{ COMPONENT }}"                    #COMPONENT is a command-line argument
+  become: yes                                 #To give root user permission to run the tasks
+  roles:
+    - "{{ COMPONENT }}"

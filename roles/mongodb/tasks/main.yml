@@ -1,0 +1,24 @@
+- name: Installing Ingnix
+  ansible.builtin.package:
+    - name: nginx
+      state: present
+
+- name: Clean-up nginx
+  ansible.builtin.file:
+    path: /usr/share/nginx/html
+    state: absent
+
+- name: Download {{ COMPONENT }} component
+  ansible.builtin.include_role:
+    name: common 
+
+- name: Copy {{ COMPONENT }} component config to nginx
+  ansible.builtin.unarchive:
+    src: "{{ APPUSER }}.conf"
+    dest: /etc/nginx/default.d/{{ APPUSER }}.conf
+
+- name: Starting Ingnix
+  ansible.builtin.systemd:
+    - name: nginx
+      state: restarted
+      enable: true
