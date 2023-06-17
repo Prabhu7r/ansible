@@ -19,7 +19,7 @@
     remote_src: yes
 
 - name: Copy {{ COMPONENT }} component config to nginx
-  ansible.builtin.templates:
+  ansible.builtin.template:
     src: "{{ APPUSER }}.conf"
     dest: /etc/nginx/default.d/{{ APPUSER }}.conf
 
