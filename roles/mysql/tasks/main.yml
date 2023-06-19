@@ -1,0 +1,55 @@
+- name: Copy the {{ COMPONENT }} repo 
+  ansible.builtin.copy:
+    src: "{{ COMPONENT }}.repo"
+    dest: /etc/yum.repos.d/{{ COMPONENT }}.repo
+
+- name: Installing {{ COMPONENT }} 
+  ansible.builtin.package:
+    - name: mysql-community-server
+      state: present
+
+- name: Start {{ COMPONENT }} 
+  ansible.builtin.systemd:
+    - name: mysqld
+      state: started
+      enable: true
+
+# Rescue and blocks work together ; Tasks in rescue will only be executed if the task in block fails
+- name: Validate the default password 
+  block: 
+    - name: Get MySQL version with non-default credentials
+      community.mysql.mysql_info:
+        login_user: root
+        login_password: RoboShop@1
+        filter: version
+  rescue:
+    - name: Fetch the log file from the rmote note
+      ansible.builtin.slurp:
+        src: /var/log/mysqld.log
+      register: mysql_pwd_log
+      
+    - name: Grep the password and assign it to a variable
+      ansible.builtin.set_fact:
+          DEFAULT_PASSWORD: "{{ mysql_pwd_log['content'] | b64decode | regex_findall('.*temporary password.*')| join(' ') |split(' ') | last }}"
+
+    - name: Reset {{COMPONENT}} Default root password
+      ansible.builtin.shell:  echo "ALTER USER 'root'@'localhost' IDENTIFIED BY 'RoboShop@1';" | mysql --connect-expired-password -uroot -p"{{DEFAULT_PASSWORD}}"
+
+- name: Download {{ COMPONENT }} component schema
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: download
+
+- name: Try to create database as root/nopassword first. If not allowed, pass the credentials
+  community.mysql.mysql_db:
+    #check_implicit_admin: true
+    login_user: root
+    login_password: RoboShop@1
+    name: cities
+    target: "/tmp/{{COMPONENT}}-main/{{ item }}.sql"
+    state: present
+    
+- name: Confirgure hostname
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: hostname
