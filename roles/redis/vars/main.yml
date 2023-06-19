@@ -1,0 +1,3 @@
+COMPONENT: redis
+APPUSER: roboshop
+ENV: dev

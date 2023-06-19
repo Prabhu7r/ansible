@@ -5,7 +5,8 @@
 
 - name: Download {{ COMPONENT }} component
   ansible.builtin.include_role:
-    name: common 
+    name: common
+    tasks_from: download
 
 - name: Clean-up nginx old content
   ansible.builtin.file:
@@ -28,3 +29,9 @@
     name: nginx
     state: restarted
     enabled: true
+
+- name: Confirgure hostname
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: hostname
+        

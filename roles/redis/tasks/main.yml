@@ -5,12 +5,12 @@
 
 - name: Installing {{ COMPONENT }} 
   ansible.builtin.package:
-    - name: mongodb-org
+    - name: redis-6.2.11
       state: present
 
 - name: Replace {{ COMPONENT }}  component public ip
   ansible.builtin.replace:
-    path: /etc/mongod.conf
+    path: /etc/{{ COMPONENT }}.conf
     regexp: '127.0.0.1'
     replace: '0.0.0.0'
 
@@ -19,19 +19,6 @@
     - name: mongod
       state: started
       enable: true
-
-- name: Download {{ COMPONENT }} component schema
-  ansible.builtin.include_role:
-    name: common
-    tasks_from: download
-
-- name: Injecting the MongoDB Schema
-  community.mongodb.mongodb_shell:
-    file: "/tmp/{{COMPONENT}}-main/{{ item }}.js"
-    idempotent: yes 
-  loop: 
-    - catalogue 
-    - users
 
 - name: Confirgure hostname
   ansible.builtin.include_role:
