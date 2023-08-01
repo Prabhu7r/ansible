@@ -1,0 +1,29 @@
+- name: Installing Maven
+  ansible.builtin.package:
+    name: maven
+    state: present
+
+- name: Create App User for {{ COMPONENT }} component
+  ansible.builtin.user:
+    name: "{{ APPUSER }}"
+    comment: Roboshop Application User
+
+- name: Download {{ COMPONENT }} component
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: download
+
+- name: Genearting Artifacts with maven install for {{ COMPONENT }} component
+  community.general.npm:
+    path: /home/{{ APPUSER }}/{{ COMPONENT }}
+
+- name: Copy the {{ COMPONENT }} component which is downloaded on the remote machines nginx path 
+  ansible.builtin.copy:
+    src: systemd.service
+    dest: /etc/systemd/system/{{ COMPONENT }}.service
+
+- name: Confirgure hostname
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: hostname
+        
